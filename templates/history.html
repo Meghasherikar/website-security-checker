@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Scan History — Website Security Checker</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <main class="container">
+      <header class="page-header">
+        <nav class="navbar">
+          <div class="logo">
+            <span class="mark" aria-hidden="true"></span>
+            <div>
+              <div class="brand">Website Security Checker</div>
+              <div class="muted" style="font-size:.8rem">Scan history</div>
+            </div>
+          </div>
+          <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/history">History</a>
+          </div>
+        </nav>
+        <div style="margin-left:auto"><a class="secondary-button" href="/">New Scan</a></div>
+      </header>
+
+      <section class="card">
+        <h2 style="margin-top:0">Recent Scans</h2>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>URL</th>
+              <th>Date (UTC)</th>
+              <th>Score</th>
+              <th>Risk</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in scans %}
+            <tr>
+              <td>{{ s.id }}</td>
+              <td class="mono">{{ s.url }}</td>
+              <td>{{ s.scanned_at }}</td>
+              <td>{{ s.score }}</td>
+              <td><span class="risk-pill small {{ 'low' if s.risk == 'Low Risk' else 'medium' if s.risk == 'Medium Risk' else 'high' }}">{{ s.risk }}</span></td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5">No scans recorded yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

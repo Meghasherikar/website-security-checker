@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Website Security Checker</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <main class="container">
+      <header class="page-header">
+        <nav class="navbar">
+          <div class="logo">
+            <span class="mark" aria-hidden="true"></span>
+            <div>
+              <div class="brand">Website Security Checker</div>
+              <div class="muted" style="font-size:.8rem">Safe HTTPS & header checks</div>
+            </div>
+          </div>
+          <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/history">History</a>
+          </div>
+        </nav>
+      </header>
+
+      <section class="card">
+        <h2 style="margin-top:0">Quick Scan</h2>
+        <p class="muted">Enter a URL to run a safe security check (HTTPS, SSL, headers).</p>
+
+        <form id="scan-form" method="post" action="/scan" style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <input id="url" name="url" type="text" placeholder="https://example.com" required style="flex:1;min-width:220px;padding:12px;border-radius:10px;border:1px solid #e8f0ff" />
+          <button type="submit" class="secondary-button" style="background:var(--accent);color:#fff;border:none">Scan</button>
+        </form>
+
+        {% if error %}
+        <div class="alert" style="margin-top:14px">{{ error }}</div>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+  </html>

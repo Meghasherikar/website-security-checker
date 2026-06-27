@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Scan Results — Website Security Checker</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <main class="container">
+      <header class="page-header">
+        <nav class="navbar">
+          <div class="logo">
+            <span class="mark" aria-hidden="true"></span>
+            <div>
+              <div class="brand">Website Security Checker</div>
+              <div class="muted" style="font-size:.8rem">Scan results</div>
+            </div>
+          </div>
+          <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/history">History</a>
+          </div>
+        </nav>
+        <div style="display:flex;gap:10px;align-items:center;margin-left:auto">
+          <a class="secondary-button" href="/history">View History</a>
+          <form method="post" action="/download_pdf" style="margin:0">
+            <input type="hidden" name="url" value="{{ results.url }}">
+            <button class="secondary-button" type="submit">Download PDF</button>
+          </form>
+          <a class="secondary-button" href="/">Scan Another Website</a>
+        </div>
+      </header>
+
+      <!-- Top row: Security score and recommendations -->
+      <section class="top-row">
+        <div class="score-card card">
+          <div class="card-header">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1L3 5v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V5l-9-4z"/></svg>
+            <p class="card-label">Security Score</p>
+          </div>
+          <div class="score-row">
+            <h2 class="score-value">{{ results.security_score }}</h2>
+            <div class="score-out">/100</div>
+          </div>
+          <div class="score-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ results.security_score }}">
+            <div class="fill" style="width: {{ results.security_score }}%"></div>
+          </div>
+          <span class="meter-label">Score: {{ results.security_score }} — visual representation of overall security posture</span>
+          <div class="risk-pill {{ 'low' if results.risk_level == 'Low Risk' else 'medium' if results.risk_level == 'Medium Risk' else 'high' }}">
+            {{ results.risk_level }}
+          </div>
+        </div>
+
+          <aside class="recommendations-card card">
+          <div class="card-header">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v2H3zM6 7h12v14H6z"/></svg>
+            <h3>Recommendations</h3>
+          </div>
+          {% if results.recommendations %}
+            <ul class="recommendations-list">
+              {% for recommendation in results.recommendations %}
+                <li>{{ recommendation }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="recommendations-success">All required headers present — no actions needed.</p>
+          {% endif %}
+        </aside>
+      </section>
+
+      <!-- Main grid: left = SSL/info, right = headers table -->
+      <section class="main-grid">
+        <section class="left-column">
+          <div class="card site-card">
+            <p class="card-label">Website</p>
+            <h2 class="site-url">{{ results.url }}</h2>
+            <p class="small">HTTPS Status: <strong class="{{ 'status-good' if results.http.https_available else 'status-bad' }}">{{ 'Secure' if results.http.https_available else 'Not Secure' }}</strong></p>
+          </div>
+
+          <div class="card ssl-card">
+            <div class="card-header">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1L3 5v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V5l-9-4z"/></svg>
+              <p class="card-label">SSL Certificate</p>
+            </div>
+            {% if results.ssl.error %}
+              <p class="error">{{ results.ssl.error }}</p>
+            {% else %}
+              <p><strong>Issuer:</strong> {{ results.ssl.issuer.get('organizationName') or results.ssl.issuer.get('commonName') or 'Unknown' }}</p>
+              <p><strong>Expires:</strong> {{ results.ssl.expires or results.ssl.notAfter or 'Unavailable' }}</p>
+              <p><strong>Days remaining:</strong> <span class="risk-pill small {{ 'low' if results.ssl.days_until_expiry is not none and results.ssl.days_until_expiry > 30 else 'medium' if results.ssl.days_until_expiry is not none and results.ssl.days_until_expiry <= 30 and results.ssl.days_until_expiry >=7 else 'high' }}">{{ results.ssl.days_until_expiry if results.ssl.days_until_expiry is not none else 'Unavailable' }}</span></p>
+            {% endif %}
+          </div>
+        </section>
+
+        <section class="right-column">
+          <div class="card headers-panel">
+            <div class="panel-header">
+              <h3>Security Headers</h3>
+              <p class="muted">Required headers for modern HTTPS sites.</p>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Header</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for name, value in results.http.headers.items() %}
+                  <tr>
+                    <td class="mono">{{ name }}</td>
+                    <td>{{ value if value else 'Missing' }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
